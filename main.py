@@ -4,8 +4,12 @@ import os
 FILE = 'tasks.json'
 def load_tasks():
     if os.path.exists(FILE):
-        with open(FILE, 'r') as f:
-            return json.load(f)
+        try:
+            with open(FILE, 'r') as f:
+                return json.load(f)
+        except (json.JSONDecodeError, ValueError):
+            # If the file is empty or contains invalid JSON, start with an empty list
+            return []
     return []
 
 def save_tasks(tasks):
@@ -16,15 +20,16 @@ def show_tasks(tasks):
     if not tasks:
         print("No tasks found.")
         return
+    
     print("Your Tasks:")
     for i, task in enumerate(tasks):
-        status = "Done" if task["done"] else ""
-        print(f"{i + 1}. {task['title']} {status}")
-    print()
+        status = "Done" if task["done"] else " "
+        print(f"{i + 1}. [{status}] {task.get('title', 'Untitled')} ({str(task.get('priority', 'none')).capitalize()})")
 
 def add_task(tasks):
     title = input("Enter task title: ")
-    tasks.append({"title": title, "done": False})
+    priority = input("Priority (Low/Medium/High): ").lower()
+    tasks.append({"title": title, "priority": priority, "done": False})
     
 def complete_task(tasks):
     show_tasks(tasks)
